@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/gorilla/websocket"
 	"github.com/moby/term"
@@ -142,7 +143,9 @@ func (c *cliSession) prepExec() (*http.Request, error) {
 		return nil, errors.New("Cannot determine websocket scheme")
 	}
 
-	u.Path = fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/exec", c.namespace, c.opts.Pod)
+	clusterName := os.Getenv("CLUSTER")
+	prefix := fmt.Sprintf("/apis/cluster.karmada.io/v1alpha1/clusters/%s/proxy", clusterName)
+	u.Path = fmt.Sprintf("%s/api/v1/namespaces/%s/pods/%s/exec", prefix, c.namespace, c.opts.Pod)
 	query := url.Values{}
 	query.Add("stdout", "true")
 	query.Add("stderr", "true")
